@@ -1,0 +1,15 @@
+{
+  "id": "inventory_qol",
+  "name": "Inventory QoL",
+  "version": "0.1.0",
+  "entry": "main.lua",
+  "api": 2,
+  "game_version": ">=0.2.14",
+  "category": "QUALITY_OF_LIFE",
+  "profile": "content",
+  "games": ["gen1", "gen2"],
+  "affects_link": false,
+  "permissions": ["engine_internals"],
+  "github": "inmento/Inventory-QoL",
+  "description": "Raises normal item stacks to 999, renders three-digit bag quantities safely, remembers the Gen 1 Bag cursor, and adds cap-aware field batch use for Rare Candies, vitamins, and PP Ups."
+}
