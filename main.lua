@@ -114,15 +114,25 @@ return function(mod)
       if not self.inventoryQoLBattle and item and Bulk.isPermanent(item.value) then
         local menu = game.stack and game.stack:top()
         if menu and menu.items then
-          local hasMany = false
-          for _, row in ipairs(menu.items) do if row.label == "USE MANY" then hasMany = true end end
-          if not hasMany then
+          local hasMax = false
+          for _, row in ipairs(menu.items) do if row.label == "MAX" then hasMax = true end end
+          if not hasMax then
             for i, row in ipairs(menu.items) do
               if row.label == "USE" then
-                table.insert(menu.items, i + 1, { label = "USE MANY", onSelect = function()
+                table.insert(menu.items, i + 1, { label = "MAX", onSelect = function()
                   Bulk.openGen1(game, item.value, self)
                 end })
-                menu.th = math.max(menu.th or 0, 7)
+                -- BagMenu creates its USE/TOSS box for two rows and four-letter
+                -- labels.  The inserted third row needs one more row-step, and
+                -- its width must be recalculated from the actual label rather
+                -- than inheriting the fixed vanilla USE/TOSS template.
+                local widest = 0
+                for _, action in ipairs(menu.items) do
+                  widest = math.max(widest, #Font.split(action.label or ""))
+                end
+                menu.tw = math.max(menu.tw or 0, widest + 3)
+                if (menu.tx or 0) + menu.tw > 20 then menu.tx = math.max(0, 20 - menu.tw) end
+                menu.th = math.max(menu.th or 0, #menu.items * (menu.rowStep or 2) + 1)
                 break
               end
             end
@@ -162,24 +172,45 @@ return function(mod)
       local pack = require("src.ui.gen2.PackMenu").new(game, opts)
       local Chrome = require("src.ui.gen2.Chrome")
       local baseRows, baseChoose = pack.submenuRows, pack.chooseSubmenu
-      local baseDrawList = pack.drawList
+      local baseDrawList, baseDrawSubmenu = pack.drawList, pack.drawSubmenu
       pack.submenuRows = function(self, itemId)
         local rows = baseRows(self, itemId)
         if not self:inBattle() and not self.give and Bulk.isPermanent(itemId) then
           for i, id in ipairs(rows) do
-            if id == "use" then table.insert(rows, i + 1, "many") break end
+            if id == "use" then table.insert(rows, i + 1, "max") break end
           end
         end
         return rows
       end
       pack.chooseSubmenu = function(self)
         local menu = self.submenu
-        if menu and menu.rows[menu.index] == "many" then
+        if menu and menu.rows[menu.index] == "max" then
           local row = menu.row
           self:closeSubmenu()
           return Bulk.openGen2(game, row.id, self)
         end
         return baseChoose(self)
+      end
+      -- PackMenu's native label table is private and knows only cart actions.
+      -- Draw an otherwise identical submenu only when our MAX row is present,
+      -- leaving every native menu on its exact engine renderer.
+      pack.drawSubmenu = function(self)
+        local menu = self.submenu
+        local hasMax = menu and menu.rows and false
+        if menu and menu.rows then
+          for _, id in ipairs(menu.rows) do if id == "max" then hasMax = true break end end
+        end
+        if not hasMax then return baseDrawSubmenu(self) end
+        local count = #menu.rows
+        local bottom = count >= 5 and 12 or 11
+        local top = bottom - count * 2
+        local labels = { use = "USE", give = "GIVE", toss = "TOSS", sel = "SEL", quit = "QUIT", max = "MAX" }
+        Chrome.box(0, top, 7, bottom - top + 1)
+        for i, id in ipairs(menu.rows) do
+          local ty = top + 1 + (i - 1) * 2
+          if i == menu.index then Chrome.cursor(1, ty) end
+          Chrome.print(labels[id] or id, 2, ty)
+        end
       end
       -- The stock renderer accepts a wider numeric string but positions it for
       -- two digits. Redraw rows with a dedicated 3-digit quantity column.

@@ -48,15 +48,36 @@ game.current = list
 assert(list.items[1].right == "x10", "Gen 1 Bag list must preserve quantity rows")
 list.onChoose(list.items[1], list)
 local menu = game.current
-assert(#menu.items == 3 and menu.items[2].label == "USE MANY",
-  "Gen 1 permanent consumables need a USE MANY field-menu row")
+assert(#menu.items == 3 and menu.items[2].label == "MAX",
+  "Gen 1 permanent consumables need a MAX field-menu row")
+assert(menu.th >= 7, "the third Gen 1 action must expand the vanilla two-row action box")
+for _, action in ipairs(menu.items) do
+  assert(#require("src.render.Font").split(action.label) <= menu.tw - 3,
+    "every Gen 1 action label must fit inside the menu border")
+end
 
 local packFactory = assert(run.loader.content.screens:get("Gen2PackMenu"))
 local pack = packFactory.new(game, { save = game.save, items = game.data.items })
 local rows = pack:submenuRows("RARE_CANDY")
 local seen = false
-for _, row in ipairs(rows) do if row == "many" then seen = true end end
-assert(seen, "Gen 2 permanent consumables need a USE MANY Pack row")
+for _, row in ipairs(rows) do if row == "max" then seen = true end end
+assert(seen, "Gen 2 permanent consumables need a MAX Pack row")
+
+local Chrome = require("src.ui.gen2.Chrome")
+local oldBox, oldCursor, oldPrint = Chrome.box, Chrome.cursor, Chrome.print
+local rendered = {}
+Chrome.box = function() end
+Chrome.cursor = function() end
+Chrome.print = function(text) rendered[#rendered + 1] = text end
+pack.submenu = { row = pack.rows[1], rows = rows, index = 2 }
+pack:drawSubmenu()
+Chrome.box, Chrome.cursor, Chrome.print = oldBox, oldCursor, oldPrint
+local sawMax = false
+for _, label in ipairs(rendered) do
+  if label == "MAX" then sawMax = true end
+  assert(#tostring(label) <= 4, "every rendered Gen 2 submenu label must fit its native box")
+end
+assert(sawMax, "Gen 2 bulk-use submenu must render MAX rather than a raw internal id")
 
 run.release()
 print(("Inventory QoL behavior Gen %d: PASS"):format(generation))

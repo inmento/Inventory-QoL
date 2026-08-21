@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — MAX action label and menu fit
+
+- Replaces the clipped **USE MANY** bulk-use action with the concise **MAX** label in the Gen 1 Bag and Gen 2 Pack.
+- Corrects the Gen 1 action menu after inserting the third row: it now grows from the vanilla two-row template to the required three-row height and recalculates its width from the actual action labels before drawing.
+- Adds a Gen 2 Pack submenu renderer for the custom row so the player sees **MAX**, rather than the internal action identifier, while native action labels retain the engine’s normal layout.
+- Adds regression coverage that checks every affected action label fits its Gen 1 or Gen 2 menu border, alongside the existing full Gen 1/Gen 2 and Useful Bag integration suite.
+
 ## 0.1.1 — Useful Bag compatibility
 
 - Resolves the `screens already registered: BagMenu` load failure when **Useful Bag** is enabled with Inventory QoL.
