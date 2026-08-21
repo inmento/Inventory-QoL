@@ -50,7 +50,13 @@ The release validation suite checks the real Mod API loader in both generations,
 
 Inventory QoL only changes item-stack limits, Bag/Pack presentation, and the field submenu for the listed permanent consumables. It does not require any other mod. It should remain compatible with mods that add normal item entries, provided they use the engine’s standard `Bag.add` path.
 
-Because the mod intentionally replaces the stock Bag and Pack screen factories, a separate mod that also replaces **the same entire screen IDs** will need explicit compatibility testing.
+### Useful Bag
+
+**Inventory QoL 0.1.1 and later explicitly supports [Useful Bag](https://github.com/ShaneMcGovernIE/useful-bag).** Useful Bag remains the Gen 1 Bag base: its six pockets, left/right cycling, sorting, PC behavior, and battle-aware pocket selection remain active. Inventory QoL then decorates that same list with its three-digit quantity display, session-only cursor memory, and field-only `USE MANY` actions.
+
+Useful Bag is an **optional** dependency, not a requirement. Inventory QoL continues to use the standard Bag when Useful Bag is not enabled.
+
+Another mod that replaces the same complete Bag or Pack screen IDs still needs explicit compatibility testing unless it uses a similar factory-composition approach.
 
 ## License
 

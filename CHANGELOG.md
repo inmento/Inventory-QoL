@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — Useful Bag compatibility
+
+- Resolves the `screens already registered: BagMenu` load failure when **Useful Bag** is enabled with Inventory QoL.
+- Declares Useful Bag as an optional dependency, ensuring its pocketed Gen 1 Bag factory loads before Inventory QoL.
+- Wraps the already-registered Useful Bag factory instead of replacing it with the vanilla Bag. Useful Bag retains its six pockets, cycling, sorting, PC handling, and battle-aware behavior, while Inventory QoL applies its three-digit counts, cursor memory, and field-only `USE MANY` layer.
+- Adds a real Mod API regression that loads both mods together and verifies the combined BagMenu, 999 stack limit, pocket projection, and cursor decoration.
+
 ## 0.1.0 — Initial release
 
 - Raises normal item and Poké Ball stacks from 99 to **999**, while preserving existing pocket and slot limits.

@@ -142,9 +142,17 @@ return function(mod)
     return list
   end
 
+  -- Screen factories are record-style registrations: only one BagMenu entry
+  -- can be effective, but another mod may already own a richer base screen.
+  -- Capture that effective factory before our explicit override, then decorate
+  -- the instance it constructs.  Useful Bag is an optional dependency so it
+  -- loads first when enabled; its pocketing remains the base while this layer
+  -- still supplies three-digit counts, cursor memory, and USE MANY.
+  local priorBagFactory = mod.content.screens:get("BagMenu")
   mod.content.screens:override("BagMenu", {
     new = function(game, opts)
-      local base = require("src.ui.BagMenu").new(game, opts)
+      local factory = priorBagFactory or require("src.ui.BagMenu")
+      local base = factory.new(game, opts)
       return installGen1Bag(base, game, opts)
     end,
   })
