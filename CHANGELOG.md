@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — Useful Bag ticker layout compatibility
+
+- Repairs the long TM/HM label ticker when **Useful Bag 2.4.1** and Inventory QoL are enabled together on the current Gen 1 Bag renderer.
+- The repair is deliberately companion-scoped: it recognizes Useful Bag’s projected Bag instance, bypasses only its legacy direct label redraw, and redraws long labels within the actual Bag item rows using the current coordinates and clipping bounds.
+- Useful Bag retains its pockets, L/R navigation, sorting, PC handling, hidden bag order, and battle-aware behavior. Inventory QoL remains unchanged when Useful Bag is absent, and Gold/Silver continue to use the normal Pack path.
+- Adds a combined real-loader regression with an overflowing TM label, asserting that the ticker starts inside the Bag row rather than using the legacy border-overlapping coordinates.
+
 ## 0.1.2 — MAX action label and menu fit
 
 - Replaces the clipped **USE MANY** bulk-use action with the concise **MAX** label in the Gen 1 Bag and Gen 2 Pack.

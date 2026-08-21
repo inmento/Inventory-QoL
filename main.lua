@@ -57,6 +57,50 @@ return function(mod)
     love.graphics.setColor(1, 1, 1, 1)
   end
 
+  -- Useful Bag 2.4.1 decorates ListMenu:draw to redraw scrolling TM/HM names
+  -- at legacy x=16 / y=8+row*16 coordinates.  The real Bag item box begins
+  -- at x=48 / y=32, so those direct overlays land over the border and wrong
+  -- rows on the current menu renderer.  The compatibility layer below owns
+  -- that redraw only when Useful Bag's projected-list marker is present.
+  local TICKER_HOLD, TICKER_SPEED = 1.6, 16
+  local BAG_LABEL_X, BAG_LABEL_WIDTH = 48, 96
+
+  local function tickerOffset(t, overflow)
+    if not (overflow and overflow > 0) then return 0 end
+    local scroll = overflow / TICKER_SPEED
+    local cycle = 2 * TICKER_HOLD + 2 * scroll
+    local p = (t or 0) % cycle
+    if p < TICKER_HOLD then return 0 end
+    p = p - TICKER_HOLD
+    if p < scroll then return -p * TICKER_SPEED end
+    p = p - scroll
+    if p < TICKER_HOLD then return -overflow end
+    return -overflow + (p - TICKER_HOLD) * TICKER_SPEED
+  end
+
+  local function drawUsefulBagLabel(item, y)
+    local label = tostring(item.label or "")
+    local width = Font.width(label)
+    if width <= BAG_LABEL_WIDTH then
+      item.ticker = nil
+      return Font.draw(label, BAG_LABEL_X, y)
+    end
+
+    local prefix = item.prefix
+    local prefixWidth = prefix and math.min(item.prefixW or Font.width(prefix), BAG_LABEL_WIDTH) or 0
+    local move = (prefix and item.move) or label
+    local scrollingWidth = width - BAG_LABEL_WIDTH
+    item.ticker = { overflow = scrollingWidth }
+    if prefix then Font.draw(prefix, BAG_LABEL_X, y) end
+
+    local g = love and love.graphics
+    if g and g.setScissor then
+      g.setScissor(BAG_LABEL_X + prefixWidth, y, BAG_LABEL_WIDTH - prefixWidth, 8)
+    end
+    Font.draw(move, BAG_LABEL_X + prefixWidth + tickerOffset(item.tick, scrollingWidth), y)
+    if g and g.setScissor then g.setScissor() end
+  end
+
   local function drawGen1Bag(self)
     love.graphics.setColor(1, 1, 1, 1)
     Font.drawBox(4, 2, 16, 11)
@@ -69,7 +113,11 @@ return function(mod)
       if not item then break end
       shown = shown + 1
       local y = 32 + (row - 1) * 16
-      Font.draw(item.label, 48, y)
+      if self.inventoryQolUsefulBag then
+        drawUsefulBagLabel(item, y)
+      else
+        Font.draw(item.label, 48, y)
+      end
       if item.right then
         local count = item.right:sub(2)
         -- Vanilla's × is at column 14; move it one tile left at 100–999,
@@ -93,6 +141,13 @@ return function(mod)
 
   local function installGen1Bag(list, game, opts)
     list.inventoryQoLBattle = opts and opts.battle or nil
+    -- Useful Bag sets this private projection marker. Its draw wrapper has
+    -- already been installed by its factory; bypass only that stale wrapper
+    -- and retain its pocket data, input, sorting, and projection callbacks.
+    if list.__pocketIndex ~= nil then
+      list.inventoryQolUsefulBag = true
+      list.draw = function(self) return self:drawItemBox() end
+    end
     local saved = game.inventoryQolBagCursor
     if saved then
       list.index = math.max(1, math.min(saved.index or 1, math.max(1, #list.items)))

@@ -27,10 +27,12 @@ assert(Bag.add(save, "POTION", 999, run.data), "999 Potions must fit with both m
 assert(not Bag.add(save, "POTION", 1, run.data), "a 1000th Potion must be refused with both mods")
 
 run.data.items.POTION = { id = "POTION", name = "Potion" }
+run.data.items.TM_04 = { id = "TM_04", name = "TM04", machine = { move = "WHIRLWIND" } }
+run.data.moves.WHIRLWIND = { id = "WHIRLWIND", name = "WHIRLWIND" }
 local stack = setmetatable({}, { __index = StateStack })
 stack:init()
 local game = {
-  save = { inventory = { POTION = 125 }, bagOrder = { "POTION" }, money = 0 },
+  save = { inventory = { POTION = 125, TM_04 = 1 }, bagOrder = { "POTION", "TM_04" }, money = 0 },
   data = run.data,
   stack = stack,
   input = {
@@ -58,6 +60,38 @@ assert(list.items[1].right == "x125",
 list.onSelectKey(nil, list)
 assert(game.inventoryQolBagCursor and game.inventoryQolBagCursor.index == list.index,
   "Inventory QoL cursor memory must decorate Useful Bag's list")
+
+-- The companion's own ticker redraw used legacy x=16/y=8+row*16 coordinates,
+-- which put long TM labels over the border in the current renderer.  The outer
+-- Inventory QoL decorator must retain the TMs pocket and redraw the long label
+-- inside the actual Bag item row at x=48/y=32 instead.
+run.loader.exports.useful_bag.switchPocket(list, 1) -- MEDICINE -> POKé BALLS
+run.loader.exports.useful_bag.switchPocket(list, 1) -- POKé BALLS -> TMs / HMs
+assert(list.__pocketIndex == 4 and list.items[1].value == "TM_04",
+  "Useful Bag's TMs/HMs pocket must remain active under the compatibility layer")
+local Font = require("src.render.Font")
+local oldLove = love
+local oldDraw, oldBox, oldCode, oldWidth = Font.draw, Font.drawBox, Font.drawCode, Font.width
+local drawn = {}
+love = { graphics = { setColor = function() end, setScissor = function() end } }
+Font.draw = function(text, x, y) drawn[#drawn + 1] = { text = text, x = x, y = y } end
+Font.drawBox = function() end
+Font.drawCode = function() end
+Font.width = function(text) return #tostring(text) * 8 end
+list:draw()
+Font.draw, Font.drawBox, Font.drawCode, Font.width = oldDraw, oldBox, oldCode, oldWidth
+love = oldLove
+local prefix, move, legacy = nil, nil, false
+for _, call in ipairs(drawn) do
+  if call.text == "TM04 " then prefix = call end
+  if call.text == "WHIRLWIND" then move = call end
+  if call.x == 16 or call.y == 24 then legacy = true end
+end
+assert(prefix and prefix.x == 48 and prefix.y == 32,
+  "long TM label prefix must begin inside the current Bag item row")
+assert(move and move.x == 88 and move.y == 32,
+  "long TM move name must redraw inside the current Bag item row")
+assert(not legacy, "Useful Bag's legacy ticker coordinates must not be used")
 
 run.release()
 print("Inventory QoL Useful Bag compatibility: PASS")
