@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 — Native Crystal support
+
+- Adds **Pokémon Crystal** support for Gen1Recomp `0.2.24` and later through the existing shared Gen 2 PackMenu implementation; no gameplay or save-data behavior was changed solely for Crystal.
+- Adds a Crystal loader smoke test that reads the official runtime metadata (`crystal` is Generation 2 with the `crystal` engine), then verifies that the `games: ["gen1", "gen2"]` manifest scope loads Inventory QoL and registers its `Gen2PackMenu` override.
+- Updates player-facing documentation and manifest metadata to list Gold, Silver, and Crystal. The mod continues to package no game ROM data or assets.
+
 ## 0.1.3 — Useful Bag ticker layout compatibility
 
 - Repairs the long TM/HM label ticker when **Useful Bag 2.4.1** and Inventory QoL are enabled together on the current Gen 1 Bag renderer.

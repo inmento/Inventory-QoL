@@ -33,20 +33,22 @@ end
 assert(multiplier and multiplier.x == 104, "Gen 1 × must shift left at three digits")
 assert(digits and digits.x == 112, "Gen 1 three digits must retain the fixed right edge")
 
-local Chrome = require("src.ui.gen2.Chrome")
-local oldPrint, oldCursor = Chrome.print, Chrome.cursor
-local chromeCalls = {}
-Chrome.print = function(text, x, y) chromeCalls[#chromeCalls + 1] = { text = text, x = x, y = y } end
-Chrome.cursor = function() end
-local pack = assert(run.loader.content.screens:get("Gen2PackMenu")).new(game, {
-  save = game.save, items = game.data.items,
-})
-pack:drawList(8, 2)
-local gen2Count
-for _, call in ipairs(chromeCalls) do if call.text == "×999" then gen2Count = call end end
-assert(gen2Count and gen2Count.x == 8, "Gen 2 three-digit stack must render from the dedicated quantity column")
+if generation == 2 then
+  local Chrome = require("src.ui.gen2.Chrome")
+  local oldPrint, oldCursor = Chrome.print, Chrome.cursor
+  local chromeCalls = {}
+  Chrome.print = function(text, x, y) chromeCalls[#chromeCalls + 1] = { text = text, x = x, y = y } end
+  Chrome.cursor = function() end
+  local pack = assert(run.loader.content.screens:get("Gen2PackMenu")).new(game, {
+    save = game.save, items = game.data.items,
+  })
+  pack:drawList(8, 2)
+  local gen2Count
+  for _, call in ipairs(chromeCalls) do if call.text == "×999" then gen2Count = call end end
+  assert(gen2Count and gen2Count.x == 8, "Gen 2 three-digit stack must render from the dedicated quantity column")
+  Chrome.print, Chrome.cursor = oldPrint, oldCursor
+end
 
 Font.draw, Font.drawBox, Font.drawCode, Font.width = original.draw, original.drawBox, original.drawCode, original.width
-Chrome.print, Chrome.cursor = oldPrint, oldCursor
 run.release()
 print(("Inventory QoL three-digit layout Gen %d: PASS"):format(generation))

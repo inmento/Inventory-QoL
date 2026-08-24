@@ -10,7 +10,7 @@ local Bag = require("src.inventory.Bag")
 local run = T.sdk.loadMods({ modPath }, { root = engineRoot, generation = generation })
 assert(#run.errors == 0, table.concat(run.errors, "\n"))
 
-local source = assert(io.open("/home/ubuntu/inventory-qol-mod-wip/bulk.lua", "r")):read("*a")
+local source = assert(io.open(engineRoot .. "/" .. modPath .. "/bulk.lua", "r")):read("*a")
 local Bulk = assert(loadstring(source, "bulk.lua"))()
 
 local game = {
@@ -56,28 +56,30 @@ for _, action in ipairs(menu.items) do
     "every Gen 1 action label must fit inside the menu border")
 end
 
-local packFactory = assert(run.loader.content.screens:get("Gen2PackMenu"))
-local pack = packFactory.new(game, { save = game.save, items = game.data.items })
-local rows = pack:submenuRows("RARE_CANDY")
-local seen = false
-for _, row in ipairs(rows) do if row == "max" then seen = true end end
-assert(seen, "Gen 2 permanent consumables need a MAX Pack row")
+if generation == 2 then
+  local packFactory = assert(run.loader.content.screens:get("Gen2PackMenu"))
+  local pack = packFactory.new(game, { save = game.save, items = game.data.items })
+  local rows = pack:submenuRows("RARE_CANDY")
+  local seen = false
+  for _, row in ipairs(rows) do if row == "max" then seen = true end end
+  assert(seen, "Gen 2 permanent consumables need a MAX Pack row")
 
-local Chrome = require("src.ui.gen2.Chrome")
-local oldBox, oldCursor, oldPrint = Chrome.box, Chrome.cursor, Chrome.print
-local rendered = {}
-Chrome.box = function() end
-Chrome.cursor = function() end
-Chrome.print = function(text) rendered[#rendered + 1] = text end
-pack.submenu = { row = pack.rows[1], rows = rows, index = 2 }
-pack:drawSubmenu()
-Chrome.box, Chrome.cursor, Chrome.print = oldBox, oldCursor, oldPrint
-local sawMax = false
-for _, label in ipairs(rendered) do
-  if label == "MAX" then sawMax = true end
-  assert(#tostring(label) <= 4, "every rendered Gen 2 submenu label must fit its native box")
+  local Chrome = require("src.ui.gen2.Chrome")
+  local oldBox, oldCursor, oldPrint = Chrome.box, Chrome.cursor, Chrome.print
+  local rendered = {}
+  Chrome.box = function() end
+  Chrome.cursor = function() end
+  Chrome.print = function(text) rendered[#rendered + 1] = text end
+  pack.submenu = { row = pack.rows[1], rows = rows, index = 2 }
+  pack:drawSubmenu()
+  Chrome.box, Chrome.cursor, Chrome.print = oldBox, oldCursor, oldPrint
+  local sawMax = false
+  for _, label in ipairs(rendered) do
+    if label == "MAX" then sawMax = true end
+    assert(#tostring(label) <= 4, "every rendered Gen 2 submenu label must fit its native box")
+  end
+  assert(sawMax, "Gen 2 bulk-use submenu must render MAX rather than a raw internal id")
 end
-assert(sawMax, "Gen 2 bulk-use submenu must render MAX rather than a raw internal id")
 
 run.release()
 print(("Inventory QoL behavior Gen %d: PASS"):format(generation))

@@ -1,6 +1,6 @@
 # Inventory QoL
 
-**Inventory QoL** is a standalone Gen1Recomp Mod API 2 mod for **Red, Blue, Yellow, Gold, and Silver**. It raises normal item stacks from 99 to **999**, renders three-digit quantities without hiding the multiplier glyph, remembers the Gen 1 Bag cursor for the current session, and adds a cap-aware field-only **USE MANY** action for permanent progression items.
+**Inventory QoL** is a standalone Gen1Recomp Mod API 2 mod for **Red, Blue, Yellow, Gold, Silver, and Crystal**. It raises normal item stacks from 99 to **999**, renders three-digit quantities without hiding the multiplier glyph, remembers the Gen 1 Bag cursor for the current session, and adds a cap-aware field-only **USE MANY** action for permanent progression items.
 
 The mod deliberately does **not** turn every item into a bulk action. Poké Balls remain one throw at a time, and temporary battle items retain their ordinary one-turn behavior.
 
@@ -10,7 +10,7 @@ The mod deliberately does **not** turn every item into a bulk action. Poké Ball
 |---|---|
 | **999 normal-item stacks** | Normal items and Poké Balls can hold up to 999 copies per item ID. Existing bag pockets and slot limits stay unchanged. Key items, HMs, and badges remain singular. |
 | **Three-digit quantity UI** | Counts from `×100` to `×999` render without overwriting the `×` glyph in the Gen 1 Bag, Gen 2 Pack, or shared quantity selector. |
-| **Gen 1 cursor memory** | Closing and reopening the Bag restores its last selection and scroll position for the current play session. This UI state is never written into the save. Gold and Silver retain the engine’s existing per-pocket cursor behavior. |
+| **Gen 1 cursor memory** | Closing and reopening the Bag restores its last selection and scroll position for the current play session. This UI state is never written into the save. Gold, Silver, and Crystal retain the engine’s existing per-pocket cursor behavior. |
 | **USE MANY** | Permanent progression items gain a field-only `USE MANY` row alongside normal `USE` and `TOSS` behavior. |
 
 ## Cap-aware batch items
@@ -40,11 +40,11 @@ The amount selector appears **after choosing the target**, so its upper bound co
 2. Install it through Gen1Recomp’s normal mod installer, then enable **Inventory QoL** in the selected profile.
 3. Open the Bag or Pack normally. No new game is required; existing stacks and saves remain usable.
 
-The mod requires **Gen1Recomp 0.2.14 or later** and Mod API 2.
+The mod requires **Gen1Recomp 0.2.24 or later** and Mod API 2. Crystal is supported through the existing Gen 2 PackMenu route; no Crystal ROM data or assets are included in the mod.
 
 ## Testing performed
 
-The release validation suite checks the real Mod API loader in both generations, the 999 stack cap, Gen 1 and Gen 2 three-digit display coordinates, Gen 1 cursor memory, PP Up limits, vitamin arithmetic, Rare Candy level caps, and a 999-stack hot path. The hot-path regression completes 999,000 existing-stack additions without a per-add bag scan.
+The release validation suite checks the real Mod API loader in both generations, the official Crystal runtime metadata and Crystal Gen 2 PackMenu loader path, the 999 stack cap, Gen 1 and Gen 2 three-digit display coordinates, Gen 1 cursor memory, PP Up limits, vitamin arithmetic, Rare Candy level caps, and a 999-stack hot path. The hot-path regression completes 999,000 existing-stack additions without a per-add bag scan.
 
 ## Compatibility
 
