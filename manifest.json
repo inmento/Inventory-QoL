@@ -1,16 +1,23 @@
 {
   "id": "inventory_qol",
   "name": "Inventory QoL",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "entry": "main.lua",
   "api": 2,
-  "game_version": ">=0.2.24",
+  "game_version": ">=0.2.18",
   "category": "QUALITY_OF_LIFE",
   "profile": "content",
-  "games": ["gen1", "gen2"],
+  "games": [
+    "gen1",
+    "gen2"
+  ],
   "affects_link": false,
-  "permissions": ["engine_internals"],
-  "optional_dependencies": ["useful_bag"],
+  "permissions": [
+    "engine_internals"
+  ],
+  "optional_dependencies": [
+    "useful_bag"
+  ],
   "github": "inmento/Inventory-QoL",
   "description": "Raises normal item stacks to 999, renders three-digit Bag quantities safely, remembers the Gen 1 Bag cursor, adds cap-aware MAX field use for Rare Candies, vitamins, and PP Ups across Gold, Silver, and Crystal, and repairs Useful Bag's current-renderer ticker layout when both mods are installed."
 }
